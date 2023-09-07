@@ -906,21 +906,23 @@ Function ExecuteCommand([string]$CommandPath, [string]$WorkingDirectory, [string
         $Process.StartInfo = $ProcessInfo
         $Process.Start() | Out-Null
         $Process.PriorityClass = [System.Diagnostics.ProcessPriorityClass]::Idle
+        $Output = $Process.StandardOutput.ReadToEnd()
 
         if ($OnLogEvent)
         {
             do
             {
                 # Keep redirecting output until process exits
-                $OnLogEvent.Invoke($process.StandardOutput.ReadLine());
+                $OnLogEvent.Invoke($Process.StandardOutput.ReadLine());
 
-            } until ($process.HasExited)
+            } until ($Process.HasExited)
         }
 
         $Process.WaitForExit()
 
         Return [PSCustomObject]@{
             ExitCode = $Process.ExitCode
+            Output = $Output
         }
     }
     Catch
