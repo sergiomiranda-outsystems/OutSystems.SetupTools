@@ -10,6 +10,9 @@ function Get-OSPlatformVersion
     .PARAMETER ServiceCenterHost
     Service Center address. If not specified, will default to localhost (127.0.0.1).
 
+    .PARAMETER UseHTTPS
+    Use HTTPS when connecting to the environment.
+
     .EXAMPLE
     Get-OSPlatformVersion -ServiceCenterHost "10.0.0.1"
 
@@ -25,7 +28,10 @@ function Get-OSPlatformVersion
         [Parameter(ValueFromPipeline=$true)]
         [Alias('Host')]
         [ValidateNotNullOrEmpty()]
-        [string[]]$ServiceCenterHost = '127.0.0.1'
+        [string[]]$ServiceCenterHost = '127.0.0.1',
+
+        [Parameter()]
+        [switch]$UseHTTPS
     )
 
     begin
@@ -38,7 +44,7 @@ function Get-OSPlatformVersion
     {
         try
         {
-            $version = GetPlatformVersion -SCHost $ServiceCenterHost
+            $version = GetPlatformVersion -SCHost $ServiceCenterHost -UseHTTPS:$UseHTTPS
         }
         catch
         {

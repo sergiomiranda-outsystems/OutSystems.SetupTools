@@ -914,11 +914,11 @@ function GenerateEncryptKey()
     return $key
 }
 
-function GetPlatformVersion([string]$SCHost)
+function GetPlatformVersion([string]$SCHost, [switch]$UseHTTPS)
 {
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting platform version from $SCHost"
 
-    $result = SCWS_GetPlatformInfo -SCHost $SCHost
+    $result = SCWS_GetPlatformInfo -SCHost $SCHost -UseHTTPS:$UseHTTPS
 
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Returning $result"
 

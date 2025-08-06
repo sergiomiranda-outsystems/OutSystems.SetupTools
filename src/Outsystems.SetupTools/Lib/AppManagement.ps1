@@ -1,6 +1,6 @@
 
 
-function AppMgmt_SolutionPublish([string]$SCHost, [string]$Solution, [pscredential]$Credential, [bool]$TwoStepMode, [string]$CallingFunction)
+function AppMgmt_SolutionPublish([string]$SCHost, [string]$Solution, [pscredential]$Credential, [bool]$TwoStepMode, [string]$CallingFunction, [switch]$UseHTTPS)
 {
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Solution path: $Solution"
 
@@ -12,7 +12,7 @@ function AppMgmt_SolutionPublish([string]$SCHost, [string]$Solution, [pscredenti
     $solutionFile = [System.IO.File]::ReadAllBytes($Solution)
 
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Publishing"
-    $publishResult = SCWS_SolutionPack_PublishWith2StepOption -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -Solution $solutionFile -TwoStepMode $TwoStepMode
+    $publishResult = SCWS_SolutionPack_PublishWith2StepOption -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -Solution $solutionFile -TwoStepMode $TwoStepMode -UseHTTPS:$UseHTTPS
 
     $publishId = $publishResult.publishId
 
@@ -38,7 +38,7 @@ function AppMgmt_SolutionPublish([string]$SCHost, [string]$Solution, [pscredenti
     return $publishResult
 }
 
-function AppMgmt_GetPublishResults([string]$SCHost, [int]$PublishId, [pscredential]$Credential, [string]$CallingFunction, [int]$AfterMessageId = 0)
+function AppMgmt_GetPublishResults([string]$SCHost, [int]$PublishId, [pscredential]$Credential, [string]$CallingFunction, [int]$AfterMessageId = 0, [switch]$UseHTTPS)
 {
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting publishing results for publish id $PublishId"
 
@@ -107,55 +107,55 @@ function AppMgmt_GetPublishResults([string]$SCHost, [int]$PublishId, [pscredenti
     return $resultsCount
 }
 
-function AppMgmt_SolutionPublishContinue([string]$SCHost, [int]$PublishId, [pscredential]$Credential)
+function AppMgmt_SolutionPublishContinue([string]$SCHost, [int]$PublishId, [pscredential]$Credential, [switch]$UseHTTPS)
 {
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Continuing publishid $PublishId"
 
     $SCUser = $Credential.UserName
     $SCPass = $Credential.GetNetworkCredential().Password
 
-    SCWS_SolutionPack_PublishContinue -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -PublishId $PublishId
+    SCWS_SolutionPack_PublishContinue -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -PublishId $PublishId -UseHTTPS:$UseHTTPS
 }
 
-function AppMgmt_SolutionPublishStop([string]$SCHost, [int]$PublishId, [pscredential]$Credential)
+function AppMgmt_SolutionPublishStop([string]$SCHost, [int]$PublishId, [pscredential]$Credential, [switch]$UseHTTPS)
 {
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Continuing publishid $PublishId"
 
     $SCUser = $Credential.UserName
     $SCPass = $Credential.GetNetworkCredential().Password
 
-    WSSC_SolutionPack_PublishAbort -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -PublishId $PublishId
+    WSSC_SolutionPack_PublishAbort -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -PublishId $PublishId -UseHTTPS:$UseHTTPS
 }
 
-function AppMgmt_GetModules([string]$SCHost, [pscredential]$Credential)
+function AppMgmt_GetModules([string]$SCHost, [pscredential]$Credential, [switch]$UseHTTPS)
 {
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting modules from $SCHost"
 
     $SCUser = $Credential.UserName
     $SCPass = $Credential.GetNetworkCredential().Password
 
-    $result = SCWS_Modules_Get -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass
+    $result = SCWS_Modules_Get -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -UseHTTPS:$UseHTTPS
 
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Returning $($result.Count) modules"
 
     return $result
 }
 
-function AppMgmt_GetApplications([string]$SCHost, [pscredential]$Credential)
+function AppMgmt_GetApplications([string]$SCHost, [pscredential]$Credential, [switch]$UseHTTPS)
 {
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting modules from $SCHost"
 
     $SCUser = $Credential.UserName
     $SCPass = $Credential.GetNetworkCredential().Password
 
-    $result = SCWS_Applications_Get -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass
+    $result = SCWS_Applications_Get -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -UseHTTPS:$UseHTTPS
 
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Returning $($result.Count) modules"
 
     return $result
 }
 
-function AppMgmt_ModulesPublish([string]$SCHost, [object[]]$Modules, [pscredential]$Credential, [string]$StagingName, [bool]$TwoStepMode, [string]$CallingFunction)
+function AppMgmt_ModulesPublish([string]$SCHost, [object[]]$Modules, [pscredential]$Credential, [string]$StagingName, [bool]$TwoStepMode, [string]$CallingFunction, [switch]$UseHTTPS)
 {
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Publishing $($Modules.Count) modules to $SCHost"
 
@@ -178,7 +178,7 @@ function AppMgmt_ModulesPublish([string]$SCHost, [object[]]$Modules, [pscredenti
         $modulesToPublish += $moduleObject
     }
 
-    $publishResult = SCWS_Staging_PublishWith2StepOption -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -ModulesToPublish $modulesToPublish -StagingName $StagingName -TwoStepMode $TwoStepMode
+    $publishResult = SCWS_Staging_PublishWith2StepOption -SCHost $SCHost -SCUser $SCUser -SCPass $SCPass -ModulesToPublish $modulesToPublish -StagingName $StagingName -TwoStepMode $TwoStepMode -UseHTTPS:$UseHTTPS
 
     $publishId = $publishResult.publishId
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Publish id is: $publishId"
