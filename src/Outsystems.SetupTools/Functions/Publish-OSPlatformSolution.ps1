@@ -29,6 +29,9 @@ function Publish-OSPlatformSolution
     .PARAMETER StartSecondStep
     Automatically start second step of solution publish to deploy apps. Requires the UseTwoStepMode parameter.
 
+    .PARAMETER UseHTTPS
+    Use HTTPS when connecting to the environment.
+
     .EXAMPLE
     $Credential = Get-Credential
     Publish-OSPlatformSolution -ServiceCenterHost "8.8.8.8" -Solution 'c:\solution.osp' -Credential $Credential
@@ -93,7 +96,11 @@ function Publish-OSPlatformSolution
         [switch]$UseTwoStepMode,
 
         [Parameter(ParameterSetName = "TwoStep")]
-        [switch]$StartSecondStep
+        [switch]$StartSecondStep,
+
+        [Parameter(ParameterSetName = "Default")]
+        [Parameter(ParameterSetName = "TwoStep")]
+        [switch]$UseHTTPS
     )
 
     begin
@@ -149,7 +156,7 @@ function Publish-OSPlatformSolution
         LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 0 -Message "Uploading solution $Solution"
         try
         {
-            $publishAsyncResult = AppMgmt_SolutionPublish -SCHost $ServiceCenter -Solution $Solution -Credential $Credential -TwoStepMode $UseTwoStepMode -CallingFunction $($MyInvocation.Mycommand)
+            $publishAsyncResult = AppMgmt_SolutionPublish -SCHost $ServiceCenter -Solution $Solution -Credential $Credential -TwoStepMode $UseTwoStepMode -CallingFunction $($MyInvocation.Mycommand) -UseHTTPS:$UseHTTPS
         }
         catch
         {
@@ -185,7 +192,7 @@ function Publish-OSPlatformSolution
 
         try
         {
-            $result = AppMgmt_GetPublishResults -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand)
+            $result = AppMgmt_GetPublishResults -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand) -UseHTTPS:$UseHTTPS
         }
         catch
         {
@@ -211,7 +218,7 @@ function Publish-OSPlatformSolution
             WriteNonTerminalError -Message "Errors found while compiling the solution"
 
             # Delete the staging. Dont care with the results for now
-            AppMgmt_SolutionPublishStop -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand)
+            AppMgmt_SolutionPublishStop -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand) -UseHTTPS:$UseHTTPS
 
             $publishResult.Success = $false
             $publishResult.PublishId = $publishId
@@ -227,7 +234,7 @@ function Publish-OSPlatformSolution
             WriteNonTerminalError -Message "Warnings found while compiling the solution"
 
             # Delete the staging. Dont care with the results for now
-            AppMgmt_SolutionPublishStop -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand)
+            AppMgmt_SolutionPublishStop -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand) -UseHTTPS:$UseHTTPS
 
             $publishResult.Success = $false
             $publishResult.PublishId = $publishId
@@ -255,7 +262,7 @@ function Publish-OSPlatformSolution
             LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 0 -Message "Continuing to the deployment..."
             try
             {
-                AppMgmt_SolutionPublishContinue -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand)
+                AppMgmt_SolutionPublishContinue -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand) -UseHTTPS:$UseHTTPS
             }
             catch
             {
@@ -277,7 +284,7 @@ function Publish-OSPlatformSolution
         #region get step 2 publish results
         try
         {
-            $result = AppMgmt_GetPublishResults -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand) -AfterMessageId $result.LastMessageId
+            $result = AppMgmt_GetPublishResults -SCHost $ServiceCenter -PublishId $publishId -Credential $Credential -CallingFunction $($MyInvocation.Mycommand) -AfterMessageId $result.LastMessageId -UseHTTPS:$UseHTTPS
         }
         catch
         {

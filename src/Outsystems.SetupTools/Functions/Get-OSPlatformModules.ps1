@@ -22,6 +22,9 @@ Function Get-OSPlatformModules
     .PARAMETER Filter
     Filter script to filter returned modules
 
+    .PARAMETER UseHTTPS
+    Use HTTPS when connecting to the environment.
+
     .EXAMPLE
     $Credential = Get-Credential
     Get-OSPlatformModules -ServiceCenter "8.8.8.8" -Credential $Credential
@@ -73,7 +76,10 @@ Function Get-OSPlatformModules
         [scriptblock]$Filter,
 
         [Parameter(ParameterSetName = 'PassThru')]
-        [switch]$PassThru
+        [switch]$PassThru,
+
+        [Parameter()]
+        [switch]$UseHTTPS
     )
 
     begin
@@ -87,7 +93,7 @@ Function Get-OSPlatformModules
         LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 0 -Message "Getting modules from $ServiceCenter"
         try
         {
-            $modules = AppMgmt_GetModules -SCHost $ServiceCenter -Credential $Credential
+            $modules = AppMgmt_GetModules -SCHost $ServiceCenter -Credential $Credential -UseHTTPS:$UseHTTPS
         }
         catch
         {

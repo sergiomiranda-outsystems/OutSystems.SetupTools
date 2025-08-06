@@ -18,6 +18,9 @@ function Get-OSPlatformApplications
     .PARAMETER Filter
     Filter script block
 
+    .PARAMETER UseHTTPS
+    Use HTTPS when connecting to the environment.
+
     .EXAMPLE
     $Credential = Get-Credential
     Get-OSPlatformApplications -ServiceCenterHost "8.8.8.8" -Credential $Credential
@@ -52,7 +55,10 @@ function Get-OSPlatformApplications
         [scriptblock]$Filter,
 
         [Parameter(ParameterSetName = 'PassThru')]
-        [switch]$PassThru
+        [switch]$PassThru,
+
+        [Parameter()]
+        [switch]$UseHTTPS
     )
 
     begin
@@ -66,7 +72,7 @@ function Get-OSPlatformApplications
         LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 0 -Message "Getting applications from $ServiceCenter"
         try
         {
-            $applications = AppMgmt_GetApplications -SCHost $ServiceCenter -Credential $Credential
+            $applications = AppMgmt_GetApplications -SCHost $ServiceCenter -Credential $Credential -UseHTTPS:$UseHTTPS
         }
         catch
         {
