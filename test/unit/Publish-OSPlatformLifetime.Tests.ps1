@@ -12,7 +12,6 @@ InModuleScope -ModuleName OutSystems.SetupTools {
         Mock GetSysComponentsCompiledVersion { return '10.0.0.1' }
         Mock GetLifetimeCompiledVersion { return '10.0.0.1' }
         Mock PublishSolution { return @{ 'Output' = 'All good'; 'ExitCode' = 0} }
-        Mock SetLifetimeCompiledVersion {}
 
         $assRunPublishSolution = @{ 'CommandName' = 'PublishSolution'; 'Times' = 1; 'Exactly' = $true; 'Scope' = 'Context'; 'ParameterFilter' = { $SCUser -eq "admin" -and $SCPass -eq "admin" } }
         $assNotRunPublishSolution = @{ 'CommandName' = 'PublishSolution'; 'Times' = 0; 'Exactly' = $true; 'Scope' = 'Context' }
@@ -168,24 +167,6 @@ InModuleScope -ModuleName OutSystems.SetupTools {
                 $result.Message | Should Be 'Error installing lifetime'
             }
             It 'Should output an error' { $err[-1] | Should Be 'Error installing lifetime. Return code: 1' }
-            It 'Should not throw' { { Publish-OSPlatformLifetime -ErrorAction SilentlyContinue } | Should Not throw }
-        }
-
-        Context 'When theres an error setting the lifetime version' {
-
-            Mock GetLifetimeCompiledVersion { return $null }
-            Mock SetLifetimeCompiledVersion { throw 'Error' }
-
-            $result = Publish-OSPlatformLifetime -ErrorVariable err -ErrorAction SilentlyContinue
-
-            It 'Should run the installation' { Assert-MockCalled @assRunPublishSolution }
-            It 'Should return the right result' {
-                $result.Success | Should Be $false
-                $result.RebootNeeded | Should Be $false
-                $result.ExitCode | Should Be -1
-                $result.Message | Should Be 'Error setting the lifetime version'
-            }
-            It 'Should output an error' { $err[-1] | Should Be 'Error setting the lifetime version' }
             It 'Should not throw' { { Publish-OSPlatformLifetime -ErrorAction SilentlyContinue } | Should Not throw }
         }
 

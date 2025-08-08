@@ -459,20 +459,6 @@ function Set-OSServerConfig
                     return $null
                 }
 
-                if ($PSBoundParameters.InstallServiceCenter.IsPresent -or $PSBoundParameters.UpgradeEnvironment.IsPresent)
-                {
-                    # Flag service center installation
-                    try
-                    {
-                        SetSCCompiledVersion -SCVersion $osVersion
-                    }
-                    catch
-                    {
-                        LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Exception $_.Exception -Stream 3 -Message "Error setting the service center version"
-                        WriteNonTerminalError -Message "Error setting the service center version"
-                    }
-                }
-
                 LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 0 -Message "Platform successfully configured"
             }
             #endregion
