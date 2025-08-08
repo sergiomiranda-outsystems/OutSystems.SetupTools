@@ -146,21 +146,6 @@ function Install-OSPlatformServiceCenter
                 return $installResult
             }
 
-            try
-            {
-                SetSCCompiledVersion -SCVersion $osVersion
-            }
-            catch
-            {
-                LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Exception $_.Exception -Stream 3 -Message "Error setting the service center version"
-                WriteNonTerminalError -Message "Error setting the service center version"
-
-                $installResult.Success = $false
-                $installResult.ExitCode = -1
-                $installResult.Message = 'Error setting the service center version'
-
-                return $installResult
-            }
         }
 
         LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 0 -Message "Service Center successfully installed!!"

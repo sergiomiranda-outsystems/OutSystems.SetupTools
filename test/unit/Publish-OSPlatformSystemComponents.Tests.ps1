@@ -10,7 +10,6 @@ InModuleScope -ModuleName OutSystems.SetupTools {
         Mock GetSCCompiledVersion { return '10.0.0.1' }
         Mock GetSysComponentsCompiledVersion { return '10.0.0.1' }
         Mock PublishSolution { return @{ 'Output' = 'All good'; 'ExitCode' = 0} }
-        Mock SetSysComponentsCompiledVersion {}
 
         $assRunPublishSolution = @{ 'CommandName' = 'PublishSolution'; 'Times' = 1; 'Exactly' = $true; 'Scope' = 'Context'; 'ParameterFilter' = { $SCUser -eq "admin" -and $SCPass -eq "admin" } }
         $assNotRunPublishSolution = @{ 'CommandName' = 'PublishSolution'; 'Times' = 0; 'Exactly' = $true; 'Scope' = 'Context' }
@@ -147,24 +146,6 @@ InModuleScope -ModuleName OutSystems.SetupTools {
                 $result.Message | Should Be 'Error installing the system components'
             }
             It 'Should output an error' { $err[-1] | Should Be 'Error installing the system components. Return code: 1' }
-            It 'Should not throw' { { Publish-OSPlatformSystemComponents -ErrorAction SilentlyContinue } | Should Not throw }
-        }
-
-        Context 'When theres an error setting the system components version' {
-
-            Mock GetSysComponentsCompiledVersion { return $null }
-            Mock SetSysComponentsCompiledVersion { throw 'Error' }
-
-            $result = Publish-OSPlatformSystemComponents -ErrorVariable err -ErrorAction SilentlyContinue
-
-            It 'Should run the installation' { Assert-MockCalled @assRunPublishSolution }
-            It 'Should return the right result' {
-                $result.Success | Should Be $false
-                $result.RebootNeeded | Should Be $false
-                $result.ExitCode | Should Be -1
-                $result.Message | Should Be 'Error setting the system components version'
-            }
-            It 'Should output an error' { $err[-1] | Should Be 'Error setting the system components version' }
             It 'Should not throw' { { Publish-OSPlatformSystemComponents -ErrorAction SilentlyContinue } | Should Not throw }
         }
 

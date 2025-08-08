@@ -10,7 +10,6 @@ InModuleScope -ModuleName OutSystems.SetupTools {
         Mock GetServerInstallDir { return 'C:\Program Files\OutSystems\Platform Server' }
         Mock GetSCCompiledVersion { return '10.0.0.1' }
         Mock RunSCInstaller { return @{ 'Output' = 'All good'; 'ExitCode' = 0} }
-        Mock SetSCCompiledVersion {}
 
         $assRunSCInstaller = @{ 'CommandName' = 'RunSCInstaller'; 'Times' = 1; 'Exactly' = $true; 'Scope' = 'Context' }
         $assNotRunSCInstaller = @{ 'CommandName' = 'RunSCInstaller'; 'Times' = 0; 'Exactly' = $true; 'Scope' = 'Context' }
@@ -220,22 +219,5 @@ InModuleScope -ModuleName OutSystems.SetupTools {
             It 'Should not throw' { { Install-OSPlatformServiceCenter -ErrorAction SilentlyContinue } | Should Not throw }
         }
 
-        Context 'When theres an error setting the service center version' {
-
-            Mock GetSCCompiledVersion { return $null }
-            Mock SetSCCompiledVersion { throw 'Error' }
-
-            $result = Install-OSPlatformServiceCenter -ErrorVariable err -ErrorAction SilentlyContinue
-
-            It 'Should run the installation' { Assert-MockCalled @assRunSCInstaller }
-            It 'Should return the right result' {
-                $result.Success | Should Be $false
-                $result.RebootNeeded | Should Be $false
-                $result.ExitCode | Should Be -1
-                $result.Message | Should Be 'Error setting the service center version'
-            }
-            It 'Should output an error' { $err[-1] | Should Be 'Error setting the service center version' }
-            It 'Should not throw' { { Install-OSPlatformServiceCenter -ErrorAction SilentlyContinue } | Should Not throw }
-        }
     }
 }

@@ -858,50 +858,38 @@ Function ExecuteCommand([string]$CommandPath, [string]$WorkingDirectory, [string
 
 function GetSCCompiledVersion()
 {
-    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting the contents of the registry key HKLM:SOFTWARE\OutSystems\Installer\Server\ServiceCenter"
-    $output = RegRead -Path "HKLM:SOFTWARE\OutSystems\Installer\Server" -Name "ServiceCenter"
+    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting the version of Service Center currently published from the version fo teh platform that compiled it"
+    $output = Get-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST/Default Web Site/ServiceCenter' `
+                                           -Filter "appSettings/add[@key='OutSystems.HubEdition.EspaceCompilationPlatformVersion']" `
+                                           -Name '.' | Select-Object -ExpandProperty 'value'
 
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Returning: $output"
 
     return $output
-}
-
-function SetSCCompiledVersion([string]$SCVersion)
-{
-    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Writting on registry HKLM:SOFTWARE\OutSystems\Installer\Server\ServiceCenter = $SCVersion"
-    RegWrite -Path "HKLM:SOFTWARE\OutSystems\Installer\Server" -Name "ServiceCenter" -Value $SCVersion -Type "String"
 }
 
 function GetSysComponentsCompiledVersion()
 {
-    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting the contents of the registry key HKLM:SOFTWARE\OutSystems\Installer\Server\SystemComponents"
-    $output = RegRead -Path "HKLM:SOFTWARE\OutSystems\Installer\Server" -Name "SystemComponents"
+    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting the version of SystemsComponents currently published from the description of the running Users module"
+    $UsersPhysicalPath = (Get-WebApplication -Site "Default Web Site" -Name Users).PhysicalPath
+    $Content = Get-Content -Path "$($UsersPhysicalPath)\appsettings.json" | ConvertFrom-Json
+    $output = $Content.OutSystems.Application.Description -replace '^For version (.*?)\. .*', '$1'
 
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Returning: $output"
 
     return $output
-}
-
-function SetSysComponentsCompiledVersion([string]$SysComponentsVersion)
-{
-    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Writting on registry HKLM:SOFTWARE\OutSystems\Installer\Server\SystemComponents = $SysComponentsVersion"
-    RegWrite -Path "HKLM:SOFTWARE\OutSystems\Installer\Server" -Name "SystemComponents" -Value $SysComponentsVersion -Type "String"
 }
 
 function GetLifetimeCompiledVersion()
 {
-    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting the contents of the registry key HKLM:SOFTWARE\OutSystems\Installer\Server\Lifetime"
-    $output = RegRead -Path "HKLM:SOFTWARE\OutSystems\Installer\Server" -Name "LifetimePublished"
+    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Getting the version of Lifetime currently published from the description of the running lifetime module"
+    $LifeTimePhysicalPath = (Get-WebApplication -Site "Default Web Site" -Name lifetime).PhysicalPath
+    $Content = Get-Content -Path "$($LifeTimePhysicalPath)\appsettings.json" | ConvertFrom-Json
+    $output = $Content.OutSystems.Application.Description -replace '^For version (.*?)\. .*', '$1'
 
     LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Returning: $output"
 
     return $output
-}
-
-function SetLifetimeCompiledVersion([string]$LifetimeVersion)
-{
-    LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 2 -Message "Writting on registry HKLM:SOFTWARE\OutSystems\Installer\Server\Lifetime = $LifetimeVersion"
-    RegWrite -Path "HKLM:SOFTWARE\OutSystems\Installer\Server" -Name "LifetimePublished" -Value $LifetimeVersion -Type "String"
 }
 
 function GenerateEncryptKey()

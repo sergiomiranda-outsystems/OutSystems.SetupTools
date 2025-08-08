@@ -175,22 +175,6 @@ function Publish-OSPlatformLifetime
                 return $installResult
             }
 
-            try
-            {
-                SetLifetimeCompiledVersion -LifetimeVersion $ltVersion
-            }
-            catch
-            {
-                LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Exception $_.Exception -Stream 3 -Message "Error setting the lifetime version"
-                WriteNonTerminalError -Message "Error setting the lifetime version"
-
-                $installResult.Success = $false
-                $installResult.ExitCode = -1
-                $installResult.Message = 'Error setting the lifetime version'
-
-                return $installResult
-            }
-
         }
 
         LogMessage -Function $($MyInvocation.Mycommand) -Phase 1 -Stream 0 -Message "Lifetime successfully installed!!"
